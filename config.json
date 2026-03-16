@@ -1,0 +1,116 @@
+{
+  "version": "1.0.0",
+  "description": "通用新闻简报生成器 - 支持多领域、多语言媒体源、定时推送",
+
+  "domains": {
+    "geopolitics": {
+      "label": "🌍 地缘政治",
+      "keywords": {
+        "zh": ["国际关系", "外交", "战争", "冲突", "制裁", "峰会", "联合国"],
+        "en": ["geopolitics", "diplomacy", "sanctions", "summit", "UN", "conflict"]
+      }
+    },
+    "tech": {
+      "label": "💻 科技",
+      "keywords": {
+        "zh": ["人工智能", "芯片", "半导体", "科技公司", "大模型", "量子计算"],
+        "en": ["AI", "semiconductor", "chip", "tech company", "LLM", "quantum"]
+      }
+    },
+    "economy": {
+      "label": "📈 经济",
+      "keywords": {
+        "zh": ["经济", "股市", "汇率", "通胀", "利率", "贸易", "GDP"],
+        "en": ["economy", "stock market", "inflation", "interest rate", "trade", "GDP"]
+      }
+    },
+    "energy": {
+      "label": "⚡ 能源",
+      "keywords": {
+        "zh": ["石油", "天然气", "新能源", "光伏", "风电", "核能", "能源转型"],
+        "en": ["oil", "natural gas", "renewable energy", "solar", "nuclear", "energy transition"]
+      }
+    },
+    "health": {
+      "label": "🏥 健康医疗",
+      "keywords": {
+        "zh": ["医疗", "药物", "疫苗", "流行病", "生物科技", "临床试验"],
+        "en": ["healthcare", "pharmaceutical", "vaccine", "pandemic", "biotech", "clinical trial"]
+      }
+    },
+    "finance": {
+      "label": "💰 金融",
+      "keywords": {
+        "zh": ["银行", "央行", "货币政策", "数字货币", "加密货币", "IPO"],
+        "en": ["banking", "central bank", "monetary policy", "CBDC", "crypto", "IPO"]
+      }
+    },
+    "climate": {
+      "label": "🌿 气候环境",
+      "keywords": {
+        "zh": ["气候变化", "碳排放", "极端天气", "环保", "碳中和"],
+        "en": ["climate change", "carbon emission", "extreme weather", "carbon neutral"]
+      }
+    },
+    "defense": {
+      "label": "🛡️ 国防军事",
+      "keywords": {
+        "zh": ["军事", "国防", "军演", "武器", "太空军事"],
+        "en": ["military", "defense", "weapons", "military exercise", "space defense"]
+      }
+    }
+  },
+
+  "mediaSources": {
+    "zh": {
+      "权威媒体": [
+        {"name": "新华社", "searchHint": "site:xinhuanet.com OR site:news.cn", "weight": 3},
+        {"name": "人民日报", "searchHint": "site:people.com.cn", "weight": 3},
+        {"name": "央视新闻", "searchHint": "site:news.cctv.com", "weight": 3},
+        {"name": "财新网", "searchHint": "site:caixin.com", "weight": 2},
+        {"name": "第一财经", "searchHint": "site:yicai.com", "weight": 2},
+        {"name": "界面新闻", "searchHint": "site:jiemian.com", "weight": 2},
+        {"name": "澎湃新闻", "searchHint": "site:thepaper.cn", "weight": 2},
+        {"name": "观察者网", "searchHint": "site:guancha.cn", "weight": 2},
+        {"name": "环球时报", "searchHint": "site:globaltimes.cn", "weight": 2}
+      ],
+      "港澳台": [
+        {"name": "南华早报", "searchHint": "site:scmp.com", "weight": 2},
+        {"name": "端传媒", "searchHint": "site:theinitium.com", "weight": 1},
+        {"name": "联合早报", "searchHint": "site:zaobao.com.sg", "weight": 2}
+      ]
+    },
+    "en": {
+      "US": [
+        {"name": "Reuters", "searchHint": "site:reuters.com", "weight": 3},
+        {"name": "AP News", "searchHint": "site:apnews.com", "weight": 3},
+        {"name": "Bloomberg", "searchHint": "site:bloomberg.com", "weight": 3},
+        {"name": "NYT", "searchHint": "site:nytimes.com", "weight": 2},
+        {"name": "Washington Post", "searchHint": "site:washingtonpost.com", "weight": 2},
+        {"name": "WSJ", "searchHint": "site:wsj.com", "weight": 2},
+        {"name": "CNN", "searchHint": "site:cnn.com", "weight": 2},
+        {"name": "Politico", "searchHint": "site:politico.com", "weight": 2}
+      ],
+      "UK": [
+        {"name": "BBC", "searchHint": "site:bbc.com/news", "weight": 3},
+        {"name": "The Guardian", "searchHint": "site:theguardian.com", "weight": 2},
+        {"name": "Financial Times", "searchHint": "site:ft.com", "weight": 3},
+        {"name": "The Economist", "searchHint": "site:economist.com", "weight": 2}
+      ],
+      "International": [
+        {"name": "Al Jazeera", "searchHint": "site:aljazeera.com", "weight": 2},
+        {"name": "Nikkei Asia", "searchHint": "site:asia.nikkei.com", "weight": 2},
+        {"name": "DW", "searchHint": "site:dw.com", "weight": 2},
+        {"name": "France24", "searchHint": "site:france24.com", "weight": 1}
+      ]
+    }
+  },
+
+  "schedules": {
+    "morning": {"label": "🌅 早间简报", "cron": "0 8 * * *", "desc": "每天早8点"},
+    "noon": {"label": "☀️ 午间简报", "cron": "0 12 * * *", "desc": "每天中午12点"},
+    "evening": {"label": "🌆 晚间简报", "cron": "0 18 * * *", "desc": "每天晚6点"},
+    "breaking": {"label": "🚨 突发追踪", "cron": "0 */4 * * *", "desc": "每4小时"},
+    "weekly": {"label": "📅 周报", "cron": "0 9 * * 1", "desc": "每周一早9点"}
+  }
+}

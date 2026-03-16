@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📰 NewsBrief — AI 新闻简报生成器</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Hero -->
+    <section class="hero">
+        <div class="container">
+            <div class="hero-badge">🤖 Powered by AI</div>
+            <h1>一句话生成<br><span class="gradient-text">专业新闻简报</span></h1>
+            <p class="hero-desc">选择领域、媒体源、推送时间 → AI 自动抓取、分析、生成结构化简报。<br>支持中英双语权威媒体，定时推送到你的桌面。</p>
+            <div class="hero-actions">
+                <a href="#demo" class="btn btn-primary">看演示 ↓</a>
+                <a href="https://github.com/simplewei/news-briefing" class="btn btn-secondary">⭐ GitHub</a>
+            </div>
+            <div class="hero-terminal">
+                <div class="terminal-header">
+                    <span class="dot red"></span>
+                    <span class="dot yellow"></span>
+                    <span class="dot green"></span>
+                    <span class="terminal-title">news-briefing</span>
+                </div>
+                <pre class="terminal-body"><code><span class="prompt">你：</span>帮我生成一份科技新闻简报，用中英双语源
+
+<span class="prompt">AI：</span>🔍 正在搜索 Reuters, Bloomberg, 新华社, 财新网...
+    ✅ 已抓取 47 条相关报道
+    📊 正在分析、去重、排序...
+    
+<span class="output">📰 科技新闻简报 | 2026.03.16</span>
+<span class="output">━━━━━━━━━━━━━━━━━━━━━━━━━━━</span>
+<span class="output">📋 今日要闻 (5)</span>
+<span class="output">1. OpenAI 发布 GPT-5 Turbo...</span>
+<span class="output">2. 台积电 2nm 量产进入最后阶段...</span>
+<span class="output">...</span></code></pre>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features -->
+    <section class="features" id="features">
+        <div class="container">
+            <h2>核心能力</h2>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">🎯</div>
+                    <h3>多领域覆盖</h3>
+                    <p>地缘政治、科技、经济、能源、金融、健康、气候、国防——8大领域自由组合</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🌐</div>
+                    <h3>权威媒体源</h3>
+                    <p>新华社、Reuters、Bloomberg、BBC、Financial Times 等 20+ 中英双语权威媒体</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">⏰</div>
+                    <h3>定时推送</h3>
+                    <p>早间/午间/晚间/突发追踪/周报——自选节奏，AI 按时生成推送</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🔍</div>
+                    <h3>多源对比</h3>
+                    <p>同一事件，不同媒体如何报道？AI 帮你横向对比，发现盲区</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">📊</div>
+                    <h3>数据洞察</h3>
+                    <p>自动提取关键数据指标，一表看清趋势变化</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🔮</div>
+                    <h3>后续追踪</h3>
+                    <p>标注未来重要事件节点，不错过任何关键时间窗口</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- How it works -->
+    <section class="how-it-works" id="how">
+        <div class="container">
+            <h2>使用方式</h2>
+            <div class="steps">
+                <div class="step">
+                    <div class="step-num">1</div>
+                    <div class="step-content">
+                        <h3>说一句话</h3>
+                        <p>"帮我生成一份地缘政治新闻简报"</p>
+                    </div>
+                </div>
+                <div class="step-arrow">→</div>
+                <div class="step">
+                    <div class="step-num">2</div>
+                    <div class="step-content">
+                        <h3>AI 自动工作</h3>
+                        <p>搜索 → 抓取 → 分析 → 去重 → 排序</p>
+                    </div>
+                </div>
+                <div class="step-arrow">→</div>
+                <div class="step">
+                    <div class="step-num">3</div>
+                    <div class="step-content">
+                        <h3>获取简报</h3>
+                        <p>结构化 4 板块简报，自动存档</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Demo Output -->
+    <section class="demo" id="demo">
+        <div class="container">
+            <h2>简报示例</h2>
+            <p class="demo-subtitle">以下为 AI 生成的科技日报示例（节选）</p>
+            <div class="briefing-preview">
+                <div class="briefing-header">
+                    <span class="briefing-tag">💻 科技日报</span>
+                    <span class="briefing-date">2026年3月16日</span>
+                </div>
+                <div class="briefing-section">
+                    <h4>📋 今日要闻</h4>
+                    <div class="news-item">
+                        <span class="news-source">Bloomberg</span>
+                        <span class="news-title">OpenAI 发布 GPT-5 Turbo，推理能力大幅提升</span>
+                        <p class="news-summary">OpenAI 推出 GPT-5 Turbo，在数学推理和代码生成基准测试中较前代提升 40%，API 价格下调 50%。</p>
+                    </div>
+                    <div class="news-item">
+                        <span class="news-source">新华社</span>
+                        <span class="news-title">中国工信部：AI 大模型备案数突破 300 个</span>
+                        <p class="news-summary">截至 3 月国内已备案生成式 AI 大模型达 312 个，覆盖医疗、金融、教育等行业。</p>
+                    </div>
+                    <div class="news-item">
+                        <span class="news-source">南华早报</span>
+                        <span class="news-title">台积电 2nm 量产进入最后阶段</span>
+                        <p class="news-summary">台积电宣布 2nm 工艺良率突破 80%，苹果 M5 和英伟达 B300 将首批采用。</p>
+                    </div>
+                </div>
+                <div class="briefing-section">
+                    <h4>🔍 深度分析</h4>
+                    <div class="analysis-box">
+                        <h5>全球 AI 芯片竞赛进入白热化</h5>
+                        <p>多方信息显示，AI 芯片赛道正形成"三足鼎立"格局：英伟达凭借 CUDA 生态护城河保持领先，AMD 在推理场景性价比突出，中国厂商加速国产替代...</p>
+                        <div class="analysis-sources">
+                            <span>来源交叉验证：南华早报 × 财新网 × Bloomberg</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="briefing-section">
+                    <h4>📊 数据看点</h4>
+                    <table class="data-table">
+                        <tr><th>指标</th><th>数值</th><th>变动</th></tr>
+                        <tr><td>全球 AI 融资（Q1）</td><td>$420亿</td><td class="up">+35% YoY</td></tr>
+                        <tr><td>半导体指数 (SOX)</td><td>5,280</td><td class="up">+2.1%</td></tr>
+                        <tr><td>中国 AI 专利申请</td><td>7.8万件</td><td class="up">+28% YoY</td></tr>
+                    </table>
+                </div>
+                <div class="briefing-section">
+                    <h4>📌 后续关注</h4>
+                    <ul class="upcoming">
+                        <li>⏰ <strong>3月18日</strong> — 苹果春季发布会</li>
+                        <li>⏰ <strong>3月20日</strong> — 英伟达 GTC 2026</li>
+                        <li>⏰ <strong>3月22日</strong> — 中美 AI 安全对话（日内瓦）</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Media Sources -->
+    <section class="media" id="media">
+        <div class="container">
+            <h2>覆盖媒体</h2>
+            <div class="media-grid">
+                <div class="media-col">
+                    <h4>🇨🇳 中文权威</h4>
+                    <div class="media-tags">
+                        <span>新华社</span><span>人民日报</span><span>央视新闻</span>
+                        <span>财新网</span><span>第一财经</span><span>澎湃新闻</span>
+                        <span>观察者网</span><span>环球时报</span>
+                    </div>
+                </div>
+                <div class="media-col">
+                    <h4>🌏 港澳台/海外</h4>
+                    <div class="media-tags">
+                        <span>南华早报</span><span>联合早报</span><span>端传媒</span>
+                    </div>
+                </div>
+                <div class="media-col">
+                    <h4>🇺🇸 美国</h4>
+                    <div class="media-tags">
+                        <span>Reuters</span><span>AP News</span><span>Bloomberg</span>
+                        <span>NYT</span><span>WSJ</span><span>CNN</span>
+                        <span>Washington Post</span><span>Politico</span>
+                    </div>
+                </div>
+                <div class="media-col">
+                    <h4>🇬🇧 英国 / 🌍 国际</h4>
+                    <div class="media-tags">
+                        <span>BBC</span><span>Financial Times</span><span>The Guardian</span>
+                        <span>The Economist</span><span>Al Jazeera</span><span>Nikkei Asia</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Quick Start -->
+    <section class="quickstart" id="start">
+        <div class="container">
+            <h2>快速开始</h2>
+            <div class="install-box">
+                <h4>📦 安装</h4>
+                <pre><code># 通过 OpenClaw Skills 安装
+clawhub install news-briefing
+
+# 或者手动克隆
+git clone https://github.com/simplewei/news-briefing.git</code></pre>
+            </div>
+            <div class="usage-cards">
+                <div class="usage-card">
+                    <h4>💬 对话生成</h4>
+                    <code>"帮我生成一份地缘政治简报"</code>
+                </div>
+                <div class="usage-card">
+                    <h4>⏰ 定时推送</h4>
+                    <code>"每天早8点推送科技简报"</code>
+                </div>
+                <div class="usage-card">
+                    <h4>🎨 自定义组合</h4>
+                    <code>"经济+能源简报，中英双语，晚间推送"</code>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <p>📰 <strong>NewsBrief</strong> — 让 AI 成为你的新闻编辑</p>
+            <p class="footer-links">
+                <a href="https://github.com/simplewei/news-briefing">GitHub</a> · 
+                <a href="#demo">演示</a> · 
+                <a href="#start">快速开始</a>
+            </p>
+            <p class="footer-copy">MIT License · Built with OpenClaw</p>
+        </div>
+    </footer>
+
+    <script src="js/main.js"></script>
+</body>
+</html>
