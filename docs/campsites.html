@@ -6,9 +6,14 @@
     <title>🚐 浙西房车露营地地图 · 高德</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <!-- 高德地图 JS API -->
-    <script src="https://webapi.amap.com/maps?v=2.0&key=YOUR_AMAP_KEY_HERE&plugin=AMap.Driving,AMap.ToolBar"></script>
-    <!-- 提示：key=YOUR_AMAP_KEY_HERE 需替换为你的高德API Key -->
-    <!-- 免费申请：https://lbs.amap.com/dev/key 选择「Web端(JS API)」 -->
+    <script>
+        window._amapLoaded = false;
+        window.onAMapLoad = function() {
+            window._amapLoaded = true;
+            initMap();
+        };
+    </script>
+    <script src="https://webapi.amap.com/maps?v=2.0&key=4a17b7ec7519baadb86894294d2c65f1&plugin=AMap.Driving,AMap.ToolBar&callback=onAMapLoad"></script>
     <style>
         :root {
             --bg:#0f172a; --bg2:#1e293b; --bg3:#334155;
@@ -124,134 +129,7 @@
         { id:'jiande-meicheng', name:'梅城古镇营地', lat:29.4522, lng:119.2986, region:'jiande', description:'梅城古镇旁，可逛古镇、品尝建德小吃。营地较新，设施不错。', phone:'0571-6414-8888', price:'100元/晚', rating:'4.1', tags:['has-hookup','has-shower'], facilities:{hookup:true,shower:true,toilet:true,wifi:true,store:true} }
     ];
 
-    // ========== 路线坐标（杭州→千岛湖→建德→桐庐→杭州）==========
-    const ROUTE_PATH = [
-        [120.1551,30.2741],  // 杭州
-        [119.5000,29.9500],  // 中间
-        [119.0190,30.0698],  // 千岛湖
-        [119.2810,29.4797],  // 建德
-        [119.6400,29.8100],  // 桐庐
-        [120.1551,30.2741]   // 回杭州
-    ];
-
-    // ========== 初始化高德地图 ==========
-    // 检查 API Key
-    const AmapKey = '4a17b7ec7519baadb86894294d2c65f1';
-    if (AmapKey === 'YOUR_AMAP_KEY_HERE') {
-        document.getElementById('map').innerHTML = `
-            <div style="display:flex;align-items:center;justify-content:center;height:100%;background:#1a1a2e;color:#e8e8ed;text-align:center;padding:40px;">
-                <div>
-                    <div style="font-size:48px;margin-bottom:16px;">🗺️</div>
-                    <h3 style="margin-bottom:12px;font-size:18px;">需要配置高德地图 API Key</h3>
-                    <p style="color:#8888a0;font-size:14px;line-height:1.6;max-width:400px;">
-                        1. 前往 <a href="https://lbs.amap.com/dev/key" target="_blank" style="color:#6366f1;">lbs.amap.com</a> 免费注册<br>
-                        2. 创建应用 → 添加 Key → 选「Web端(JS API)」<br>
-                        3. 复制 Key，替换 campsites.html 第21行的 <code style="background:#333;padding:2px 6px;border-radius:4px;">YOUR_AMAP_KEY_HERE</code><br>
-                        4. 刷新页面即可看到地图
-                    </p>
-                    <p style="color:#22c55e;font-size:13px;margin-top:16px;">✅ 侧边栏营地列表和筛选功能不受影响，可正常使用</p>
-                </div>
-            </div>
-        `;
-        // 仍然渲染侧边栏
-        renderCampsiteList();
-        // 不初始化地图
-    } else {
-
-    const map = new AMap.Map('map', {
-        zoom: 9,
-        center: [119.5, 29.8],
-        mapStyle: 'amap://styles/darkblue',
-        viewMode: '2D'
-    });
-
-    // 添加工具条
-    map.addControl(new AMap.ToolBar({ position: 'RB' }));
-
-    // ========== 画路线 ==========
-    // 先用折线画推荐路线
-    const routePolyline = new AMap.Polyline({
-        path: ROUTE_PATH,
-        strokeColor: '#eab308',
-        strokeWeight: 3,
-        strokeStyle: 'dashed',
-        strokeDasharray: [10, 10],
-        strokeOpacity: 0.7,
-        zIndex: 50
-    });
-    map.add(routePolyline);
-
-    // ========== 驾车路线规划（可选：获取真实道路路线）==========
-    function drawDrivingRoute() {
-        const driving = new AMap.Driving({ map: map, panel: null });
-        // 分段规划
-        const segments = [
-            { start: [120.1551,30.2741], end: [119.0190,30.0698] }, // 杭州→千岛湖
-            { start: [119.0190,30.0698], end: [119.2810,29.4797] }, // 千岛湖→建德
-            { start: [119.2810,29.4797], end: [119.6400,29.8100] }, // 建德→桐庐
-            { start: [119.6400,29.8100], end: [120.1551,30.2741] }  // 桐庐→杭州
-        ];
-        segments.forEach(seg => {
-            driving.search(seg.start, seg.end, (status, result) => {
-                if (status === 'complete') {
-                    console.log('路线规划完成');
-                }
-            });
-        });
-    }
-    // 默认不画真实路线（需要API配额），用虚线代替
-    // drawDrivingRoute();  // 取消注释启用真实驾车路线
-
-    // ========== 添加标记点 ==========
-    const markers = {};
-    const infoWindows = {};
-
-    CAMPSITES.forEach(cs => {
-        // 自定义标记内容
-        let markerContent;
-        let markerColor;
-        if (cs.type === 'start') {
-            markerColor = '#22c55e';
-            markerContent = `<div style="background:${markerColor};color:white;padding:6px 14px;border-radius:20px;font-size:13px;font-weight:600;white-space:nowrap;box-shadow:0 4px 12px rgba(0,0,0,0.4);text-align:center;position:relative;">🏠 杭州<div style="position:absolute;bottom:-6px;left:50%;transform:translateX(-50%);width:0;height:0;border-left:6px solid transparent;border-right:6px solid transparent;border-top:6px solid ${markerColor};"></div></div>`;
-        } else if (cs.recommended) {
-            markerColor = '#eab308';
-            markerContent = `<div style="background:${markerColor};color:#000;padding:6px 14px;border-radius:20px;font-size:13px;font-weight:600;white-space:nowrap;box-shadow:0 4px 12px rgba(0,0,0,0.4);text-align:center;position:relative;">⭐ ${cs.name.slice(0,6)}<div style="position:absolute;bottom:-6px;left:50%;transform:translateX(-50%);width:0;height:0;border-left:6px solid transparent;border-right:6px solid transparent;border-top:6px solid ${markerColor};"></div></div>`;
-        } else {
-            markerColor = '#3b82f6';
-            markerContent = `<div style="background:${markerColor};color:white;padding:5px 12px;border-radius:16px;font-size:12px;font-weight:500;white-space:nowrap;box-shadow:0 4px 12px rgba(0,0,0,0.4);text-align:center;position:relative;">📍 ${cs.name.slice(0,6)}<div style="position:absolute;bottom:-6px;left:50%;transform:translateX(-50%);width:0;height:0;border-left:5px solid transparent;border-right:5px solid transparent;border-top:5px solid ${markerColor};"></div></div>`;
-        }
-
-        const marker = new AMap.Marker({
-            position: new AMap.LngLat(cs.lng, cs.lat),
-            content: markerContent,
-            offset: new AMap.Pixel(-30, -40),
-            title: cs.name
-        });
-
-        // 信息窗体
-        const infoWindow = new AMap.InfoWindow({
-            content: `
-                <div style="min-width:220px;padding:8px;">
-                    <div style="font-size:15px;font-weight:600;margin-bottom:6px;">${cs.name}</div>
-                    ${cs.price ? '<div style="font-size:13px;color:#666;margin-bottom:4px;">💰 '+cs.price+'</div>' : ''}
-                    ${cs.phone ? '<div style="font-size:13px;color:#666;margin-bottom:4px;">📞 '+cs.phone+'</div>' : ''}
-                    ${cs.rating ? '<div style="font-size:13px;color:#666;margin-bottom:4px;">⭐ '+cs.rating+'/5</div>' : ''}
-                    <div style="font-size:12px;color:#888;line-height:1.5;margin-top:6px;">${cs.description.slice(0, 120)}</div>
-                </div>
-            `,
-            offset: new AMap.Pixel(0, -30)
-        });
-
-        marker.on('click', () => {
-            infoWindow.open(map, marker.getPosition());
-        });
-
-        map.add(marker);
-        markers[cs.id] = marker;
-        infoWindows[cs.id] = infoWindow;
-    });
-
-    // ========== 侧边栏渲染 ==========
+    // ========== 侧边栏渲染（不依赖地图API）==========
     function renderCampsiteList(filter = 'all') {
         const list = document.getElementById('campsiteList');
         const filtered = CAMPSITES.filter(cs => {
@@ -294,25 +172,94 @@
         renderCampsiteList(el.dataset.filter);
     }
 
+    // 先渲染侧边栏
+    renderCampsiteList();
+
+    // ========== 地图相关变量 ==========
+    let map = null;
+    const markers = {};
+    const infoWindows = {};
+
+    const ROUTE_PATH = [
+        [120.1551,30.2741],
+        [119.5000,29.9500],
+        [119.0190,30.0698],
+        [119.2810,29.4797],
+        [119.6400,29.8100],
+        [120.1551,30.2741]
+    ];
+
+    // ========== 高德地图初始化（由 callback 触发）==========
+    function initMap() {
+        map = new AMap.Map('map', {
+            zoom: 9,
+            center: [119.5, 29.8],
+            mapStyle: 'amap://styles/darkblue',
+            viewMode: '2D'
+        });
+
+        map.addControl(new AMap.ToolBar({ position: 'RB' }));
+
+        // 画路线
+        const routePolyline = new AMap.Polyline({
+            path: ROUTE_PATH,
+            strokeColor: '#eab308',
+            strokeWeight: 3,
+            strokeStyle: 'dashed',
+            strokeDasharray: [10, 10],
+            strokeOpacity: 0.7,
+            zIndex: 50
+        });
+        map.add(routePolyline);
+
+        // 添加标记点
+        CAMPSITES.forEach(cs => {
+            let markerContent, markerColor;
+            if (cs.type === 'start') {
+                markerColor = '#22c55e';
+                markerContent = `<div style="background:${markerColor};color:white;padding:6px 14px;border-radius:20px;font-size:13px;font-weight:600;white-space:nowrap;box-shadow:0 4px 12px rgba(0,0,0,0.4);text-align:center;position:relative;">🏠 杭州<div style="position:absolute;bottom:-6px;left:50%;transform:translateX(-50%);width:0;height:0;border-left:6px solid transparent;border-right:6px solid transparent;border-top:6px solid ${markerColor};"></div></div>`;
+            } else if (cs.recommended) {
+                markerColor = '#eab308';
+                markerContent = `<div style="background:${markerColor};color:#000;padding:6px 14px;border-radius:20px;font-size:13px;font-weight:600;white-space:nowrap;box-shadow:0 4px 12px rgba(0,0,0,0.4);text-align:center;position:relative;">⭐ ${cs.name.slice(0,6)}<div style="position:absolute;bottom:-6px;left:50%;transform:translateX(-50%);width:0;height:0;border-left:6px solid transparent;border-right:6px solid transparent;border-top:6px solid ${markerColor};"></div></div>`;
+            } else {
+                markerColor = '#3b82f6';
+                markerContent = `<div style="background:${markerColor};color:white;padding:5px 12px;border-radius:16px;font-size:12px;font-weight:500;white-space:nowrap;box-shadow:0 4px 12px rgba(0,0,0,0.4);text-align:center;position:relative;">📍 ${cs.name.slice(0,6)}<div style="position:absolute;bottom:-6px;left:50%;transform:translateX(-50%);width:0;height:0;border-left:5px solid transparent;border-right:5px solid transparent;border-top:5px solid ${markerColor};"></div></div>`;
+            }
+
+            const marker = new AMap.Marker({
+                position: new AMap.LngLat(cs.lng, cs.lat),
+                content: markerContent,
+                offset: new AMap.Pixel(-30, -40),
+                title: cs.name
+            });
+
+            const infoWindow = new AMap.InfoWindow({
+                content: `<div style="min-width:220px;padding:8px;"><div style="font-size:15px;font-weight:600;margin-bottom:6px;">${cs.name}</div>${cs.price?'<div style="font-size:13px;color:#666;margin-bottom:4px;">💰 '+cs.price+'</div>':''}${cs.phone?'<div style="font-size:13px;color:#666;margin-bottom:4px;">📞 '+cs.phone+'</div>':''}${cs.rating?'<div style="font-size:13px;color:#666;margin-bottom:4px;">⭐ '+cs.rating+'/5</div>':''}<div style="font-size:12px;color:#888;line-height:1.5;margin-top:6px;">${cs.description.slice(0,120)}</div></div>`,
+                offset: new AMap.Pixel(0, -30)
+            });
+
+            marker.on('click', () => infoWindow.open(map, marker.getPosition()));
+            map.add(marker);
+            markers[cs.id] = marker;
+            infoWindows[cs.id] = infoWindow;
+        });
+
+        // 自动调整视野
+        setTimeout(() => map.setFitView(null, false, [60,60,60,60]), 500);
+    }
+
     function focusCampsite(id) {
         const cs = CAMPSITES.find(c => c.id === id);
         if (!cs) return;
         
-        map.setZoomAndCenter(14, [cs.lng, cs.lat]);
-        infoWindows[id].open(map, markers[id].getPosition());
+        if (map) {
+            map.setZoomAndCenter(14, [cs.lng, cs.lat]);
+            infoWindows[id].open(map, markers[id].getPosition());
+        }
         
         document.querySelectorAll('.campsite-card').forEach(c => c.classList.remove('active'));
         document.querySelector(`[data-id="${id}"]`)?.classList.add('active');
     }
-
-    // ========== 初始化 ==========
-    renderCampsiteList();
-
-    // 自动调整视野包含所有标记
-    setTimeout(() => {
-        map.setFitView(null, false, [60, 60, 60, 60]);
-    }, 500);
-    } // end of if (AmapKey !== 'YOUR_AMAP_KEY_HERE')
     </script>
 </body>
 </html>
