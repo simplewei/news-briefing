@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📰 NewsBrief — 新闻简报生成器</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0a0a0f; --bg2: #12121a; --bg3: #1a1a2e; --bg4: #22223a;
+            --text: #e8e8ed; --text2: #8888a0;
+            --accent: #6366f1; --accent2: #818cf8; --accent-glow: rgba(99,102,241,0.3);
+            --green: #22c55e; --red: #ef4444; --yellow: #eab308; --orange: #f97316;
+            --border: rgba(255,255,255,0.08); --radius: 12px;
+        }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { font-family:'Inter',-apple-system,sans-serif; background:var(--bg); color:var(--text); min-height:100vh; }
+        
+        /* Layout */
+        .app-container { display:flex; min-height:100vh; }
+        .sidebar { width:320px; background:var(--bg2); border-right:1px solid var(--border); padding:24px; overflow-y:auto; flex-shrink:0; }
+        .main { flex:1; padding:32px 40px; overflow-y:auto; max-height:100vh; }
+        
+        /* Sidebar */
+        .logo { font-size:22px; font-weight:800; margin-bottom:4px; }
+        .logo span { background:linear-gradient(135deg,var(--accent2),#a78bfa,#f472b6); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+        .logo-sub { font-size:12px; color:var(--text2); margin-bottom:28px; }
+        
+        .config-section { margin-bottom:24px; }
+        .config-label { font-size:13px; font-weight:600; color:var(--text2); margin-bottom:10px; text-transform:uppercase; letter-spacing:0.5px; }
+        
+        /* Domain chips */
+        .chip-group { display:flex; flex-wrap:wrap; gap:8px; }
+        .chip { padding:6px 14px; border-radius:20px; font-size:13px; border:1px solid var(--border); background:var(--bg); cursor:pointer; transition:all 0.2s; user-select:none; }
+        .chip:hover { border-color:var(--accent); }
+        .chip.active { background:var(--accent); border-color:var(--accent); color:white; }
+        .chip .chip-icon { margin-right:4px; }
+        
+        /* Media list */
+        .media-group { margin-bottom:12px; }
+        .media-group-title { font-size:12px; color:var(--text2); margin-bottom:6px; font-weight:500; }
+        .media-items { display:flex; flex-wrap:wrap; gap:6px; }
+        .media-chip { padding:4px 10px; border-radius:6px; font-size:12px; border:1px solid var(--border); background:var(--bg); cursor:pointer; transition:all 0.2s; user-select:none; }
+        .media-chip:hover { border-color:var(--accent); }
+        .media-chip.active { background:var(--accent); border-color:var(--accent); color:white; }
+        .media-chip.disabled { opacity:0.4; cursor:not-allowed; }
+        
+        /* Language toggle */
+        .lang-toggle { display:flex; gap:8px; margin-bottom:8px; }
+        .lang-btn { flex:1; padding:8px; border-radius:8px; border:1px solid var(--border); background:var(--bg); color:var(--text2); font-size:13px; cursor:pointer; text-align:center; transition:all 0.2s; }
+        .lang-btn.active { background:var(--accent); border-color:var(--accent); color:white; }
+        
+        /* Generate button */
+        .generate-btn { width:100%; padding:14px; border-radius:10px; background:linear-gradient(135deg,var(--accent),#7c3aed); color:white; font-size:15px; font-weight:700; border:none; cursor:pointer; transition:all 0.2s; margin-top:8px; }
+        .generate-btn:hover { transform:translateY(-1px); box-shadow:0 8px 24px var(--accent-glow); }
+        .generate-btn:disabled { opacity:0.5; cursor:not-allowed; transform:none; box-shadow:none; }
+        .generate-btn .spinner { display:none; }
+        .generate-btn.loading .spinner { display:inline-block; animation:spin 1s linear infinite; }
+        .generate-btn.loading .btn-text { display:none; }
+        @keyframes spin { to { transform:rotate(360deg); } }
+        
+        /* Main content */
+        .main-header { margin-bottom:24px; }
+        .main-title { font-size:28px; font-weight:700; margin-bottom:4px; }
+        .main-subtitle { color:var(--text2); font-size:14px; }
+        
+        /* Empty state */
+        .empty-state { text-align:center; padding:120px 40px; color:var(--text2); }
+        .empty-state .icon { font-size:64px; margin-bottom:16px; opacity:0.5; }
+        .empty-state h3 { font-size:18px; margin-bottom:8px; color:var(--text); }
+        .empty-state p { font-size:14px; max-width:400px; margin:0 auto; line-height:1.6; }
+        
+        /* Briefing output */
+        .briefing { display:none; }
+        .briefing.visible { display:block; }
+        
+        .briefing-meta { display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; flex-wrap:wrap; gap:12px; }
+        .briefing-tags { display:flex; gap:8px; flex-wrap:wrap; }
+        .briefing-tag { padding:4px 10px; border-radius:6px; font-size:12px; background:var(--bg3); color:var(--accent2); border:1px solid var(--border); }
+        .briefing-actions { display:flex; gap:8px; }
+        .action-btn { padding:6px 14px; border-radius:6px; font-size:12px; background:var(--bg3); color:var(--text2); border:1px solid var(--border); cursor:pointer; transition:all 0.2s; }
+        .action-btn:hover { border-color:var(--accent); color:var(--accent2); }
+        
+        .section { margin-bottom:24px; background:var(--bg2); border:1px solid var(--border); border-radius:var(--radius); overflow:hidden; }
+        .section-header { padding:14px 20px; background:var(--bg3); border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; }
+        .section-title { font-size:15px; font-weight:600; }
+        .section-count { font-size:12px; color:var(--text2); background:var(--bg); padding:2px 8px; border-radius:10px; }
+        .section-body { padding:16px 20px; }
+        
+        /* News items */
+        .news-item { padding:12px 0; border-bottom:1px solid var(--border); }
+        .news-item:last-child { border-bottom:none; }
+        .news-header { display:flex; align-items:center; gap:8px; margin-bottom:4px; flex-wrap:wrap; }
+        .news-source-badge { font-size:11px; font-weight:600; padding:2px 8px; border-radius:4px; }
+        .news-source-badge.zh { background:rgba(239,68,68,0.15); color:#f87171; }
+        .news-source-badge.en { background:rgba(59,130,246,0.15); color:#60a5fa; }
+        .news-time { font-size:11px; color:var(--text2); }
+        .news-title { font-size:14px; font-weight:600; margin:4px 0; line-height:1.4; }
+        .news-title a { color:var(--text); text-decoration:none; }
+        .news-title a:hover { color:var(--accent2); }
+        .news-summary { font-size:13px; color:var(--text2); line-height:1.5; }
+        
+        /* Analysis */
+        .analysis-box { background:var(--bg); border-left:3px solid var(--accent); padding:16px 20px; border-radius:0 8px 8px 0; margin-bottom:12px; }
+        .analysis-box:last-child { margin-bottom:0; }
+        .analysis-title { font-size:14px; font-weight:600; margin-bottom:8px; }
+        .analysis-text { font-size:13px; color:var(--text2); line-height:1.6; }
+        .analysis-sources { margin-top:8px; font-size:11px; color:var(--accent2); }
+        
+        /* Data table */
+        .data-table { width:100%; border-collapse:collapse; font-size:13px; }
+        .data-table th, .data-table td { padding:10px 12px; text-align:left; border-bottom:1px solid var(--border); }
+        .data-table th { color:var(--text2); font-weight:500; font-size:12px; }
+        .data-table .up { color:var(--green); }
+        .data-table .down { color:var(--red); }
+        
+        /* Upcoming */
+        .upcoming-list { list-style:none; }
+        .upcoming-list li { padding:8px 0; font-size:13px; border-bottom:1px solid var(--border); display:flex; gap:8px; }
+        .upcoming-list li:last-child { border-bottom:none; }
+        .upcoming-date { font-weight:600; color:var(--accent2); min-width:80px; }
+        
+        /* Status bar */
+        .status-bar { position:fixed; bottom:0; left:320px; right:0; background:var(--bg2); border-top:1px solid var(--border); padding:8px 24px; font-size:12px; color:var(--text2); display:none; align-items:center; gap:8px; z-index:100; }
+        .status-bar.visible { display:flex; }
+        .status-dot { width:8px; height:8px; border-radius:50%; }
+        .status-dot.working { background:var(--yellow); animation:pulse 1s infinite; }
+        .status-dot.done { background:var(--green); }
+        .status-dot.error { background:var(--red); }
+        @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+        
+        /* Responsive */
+        @media(max-width:900px) {
+            .app-container { flex-direction:column; }
+            .sidebar { width:100%; max-height:50vh; border-right:none; border-bottom:1px solid var(--border); }
+            .main { max-height:none; padding:20px; }
+            .status-bar { left:0; }
+        }
+        
+        /* Toast */
+        .toast { position:fixed; top:20px; right:20px; padding:12px 20px; border-radius:8px; font-size:13px; z-index:1000; transform:translateX(120%); transition:transform 0.3s ease; }
+        .toast.show { transform:translateX(0); }
+        .toast.success { background:var(--green); color:white; }
+        .toast.error { background:var(--red); color:white; }
+        .toast.info { background:var(--accent); color:white; }
+        
+        /* Scrollbar */
+        ::-webkit-scrollbar { width:6px; }
+        ::-webkit-scrollbar-track { background:transparent; }
+        ::-webkit-scrollbar-thumb { background:var(--bg4); border-radius:3px; }
+        ::-webkit-scrollbar-thumb:hover { background:var(--text2); }
+        
+        /* Schedule selector */
+        .schedule-options { display:flex; flex-wrap:wrap; gap:6px; }
+        .schedule-chip { padding:6px 12px; border-radius:8px; font-size:12px; border:1px solid var(--border); background:var(--bg); cursor:pointer; transition:all 0.2s; }
+        .schedule-chip:hover { border-color:var(--accent); }
+        .schedule-chip.active { background:var(--accent); border-color:var(--accent); color:white; }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar Config -->
+        <div class="sidebar">
+            <div class="logo">📰 <span>NewsBrief</span></div>
+            <div class="logo-sub">AI 新闻简报生成器 · 打开即用</div>
+            
+            <!-- 1. Domain Selection -->
+            <div class="config-section">
+                <div class="config-label">🎯 选择领域</div>
+                <div class="chip-group" id="domainChips"></div>
+            </div>
+            
+            <!-- 2. Language Filter -->
+            <div class="config-section">
+                <div class="config-label">🌐 媒体语言</div>
+                <div class="lang-toggle">
+                    <div class="lang-btn active" data-lang="all" onclick="toggleLang(this)">全部</div>
+                    <div class="lang-btn" data-lang="zh" onclick="toggleLang(this)">🇨🇳 中文</div>
+                    <div class="lang-btn" data-lang="en" onclick="toggleLang(this)">🇺🇸 英文</div>
+                </div>
+            </div>
+            
+            <!-- 3. Media Sources -->
+            <div class="config-section">
+                <div class="config-label">📡 媒体源</div>
+                <div id="mediaList"></div>
+            </div>
+            
+            <!-- 4. Schedule (for display only in web version) -->
+            <div class="config-section">
+                <div class="config-label">⏰ 简报类型</div>
+                <div class="schedule-options">
+                    <div class="schedule-chip active" data-schedule="instant" onclick="toggleSchedule(this)">⚡ 即时生成</div>
+                    <div class="schedule-chip" data-schedule="morning" onclick="toggleSchedule(this)">🌅 早间</div>
+                    <div class="schedule-chip" data-schedule="noon" onclick="toggleSchedule(this)">☀️ 午间</div>
+                    <div class="schedule-chip" data-schedule="evening" onclick="toggleSchedule(this)">🌆 晚间</div>
+                    <div class="schedule-chip" data-schedule="weekly" onclick="toggleSchedule(this)">📅 周报</div>
+                </div>
+            </div>
+            
+            <!-- Generate -->
+            <button class="generate-btn" id="generateBtn" onclick="generateBriefing()">
+                <span class="btn-text">🚀 生成简报</span>
+                <span class="spinner">⏳ 正在搜索和分析...</span>
+            </button>
+        </div>
+        
+        <!-- Main Content -->
+        <div class="main" id="mainContent">
+            <!-- Empty state -->
+            <div class="empty-state" id="emptyState">
+                <div class="icon">📰</div>
+                <h3>选择领域和媒体源</h3>
+                <p>在左侧选择你感兴趣的领域和媒体源，点击「生成简报」即可获得结构化新闻摘要。</p>
+                <p style="margin-top:16px;font-size:12px;color:var(--text2)">💡 支持多领域组合 · 20+ 权威媒体 · 实时抓取</p>
+            </div>
+            
+            <!-- Briefing output -->
+            <div class="briefing" id="briefingOutput"></div>
+        </div>
+    </div>
+    
+    <!-- Status bar -->
+    <div class="status-bar" id="statusBar">
+        <div class="status-dot" id="statusDot"></div>
+        <span id="statusText"></span>
+    </div>
+    
+    <!-- Toast -->
+    <div class="toast" id="toast"></div>
+
+    <script src="js/app.js"></script>
+</body>
+</html>

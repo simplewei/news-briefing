@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🚐 浙西房车露营地地图</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0f172a; --bg2: #1e293b; --bg3: #334155;
+            --text: #f1f5f9; --text2: #94a3b8;
+            --accent: #3b82f6; --green: #22c55e; --yellow: #eab308; --red: #ef4444;
+            --border: rgba(255,255,255,0.1); --radius: 12px;
+        }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { font-family:'Inter',sans-serif; background:var(--bg); color:var(--text); }
+        
+        /* Layout */
+        .app { display:flex; height:100vh; }
+        .sidebar { width:380px; background:var(--bg2); border-right:1px solid var(--border); display:flex; flex-direction:column; flex-shrink:0; }
+        .sidebar-header { padding:20px; border-bottom:1px solid var(--border); }
+        .sidebar-header h1 { font-size:20px; font-weight:700; margin-bottom:4px; }
+        .sidebar-header p { font-size:13px; color:var(--text2); }
+        
+        /* Filters */
+        .filters { padding:16px 20px; border-bottom:1px solid var(--border); }
+        .filter-row { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:10px; }
+        .filter-chip { padding:6px 12px; border-radius:20px; font-size:12px; border:1px solid var(--border); background:var(--bg); cursor:pointer; transition:all 0.2s; user-select:none; }
+        .filter-chip:hover { border-color:var(--accent); }
+        .filter-chip.active { background:var(--accent); border-color:var(--accent); color:white; }
+        
+        .route-info { padding:12px 16px; background:var(--bg); border-radius:8px; margin-bottom:10px; }
+        .route-info h4 { font-size:13px; margin-bottom:6px; color:var(--accent); }
+        .route-stops { display:flex; align-items:center; gap:6px; flex-wrap:wrap; font-size:12px; }
+        .route-stops .arrow { color:var(--text2); }
+        .route-stop { padding:2px 8px; background:var(--bg3); border-radius:4px; }
+        
+        /* Campsite list */
+        .campsite-list { flex:1; overflow-y:auto; padding:12px; }
+        .campsite-card { background:var(--bg); border:1px solid var(--border); border-radius:var(--radius); padding:16px; margin-bottom:10px; cursor:pointer; transition:all 0.2s; }
+        .campsite-card:hover, .campsite-card.active { border-color:var(--accent); box-shadow:0 0 0 1px var(--accent); }
+        .campsite-card.highlighted { border-color:var(--yellow); box-shadow:0 0 0 2px var(--yellow); }
+        .card-header { display:flex; justify-content:space-between; align-items:start; margin-bottom:8px; }
+        .card-name { font-size:15px; font-weight:600; }
+        .card-rating { font-size:12px; padding:2px 8px; border-radius:10px; }
+        .card-rating.good { background:rgba(34,197,94,0.15); color:var(--green); }
+        .card-rating.avg { background:rgba(234,179,8,0.15); color:var(--yellow); }
+        .card-tags { display:flex; gap:6px; flex-wrap:wrap; margin-bottom:8px; }
+        .tag { font-size:11px; padding:2px 8px; border-radius:4px; background:var(--bg3); color:var(--text2); }
+        .tag.has { background:rgba(34,197,94,0.15); color:var(--green); }
+        .tag.no { background:rgba(239,68,68,0.15); color:var(--red); }
+        .card-detail { font-size:13px; color:var(--text2); line-height:1.5; margin-bottom:8px; }
+        .card-footer { display:flex; justify-content:space-between; align-items:center; font-size:12px; }
+        .card-price { color:var(--yellow); font-weight:600; }
+        .card-dist { color:var(--text2); }
+        .card-phone { color:var(--accent); font-weight:500; }
+        
+        /* Map */
+        .map-container { flex:1; position:relative; }
+        #map { width:100%; height:100%; }
+        
+        /* Custom markers */
+        .custom-marker { 
+            background:var(--accent); color:white; 
+            padding:6px 10px; border-radius:20px; font-size:12px; font-weight:600;
+            white-space:nowrap; box-shadow:0 4px 12px rgba(0,0,0,0.3);
+            position:relative;
+        }
+        .custom-marker::after {
+            content:''; position:absolute; bottom:-6px; left:50%; transform:translateX(-50%);
+            border-left:6px solid transparent; border-right:6px solid transparent;
+            border-top:6px solid var(--accent);
+        }
+        .custom-marker.recommended { background:var(--yellow); color:#000; }
+        .custom-marker.recommended::after { border-top-color:var(--yellow); }
+        .custom-marker.start { background:var(--green); }
+        .custom-marker.start::after { border-top-color:var(--green); }
+        
+        /* Popup */
+        .leaflet-popup-content-wrapper { background:var(--bg2) !important; color:var(--text) !important; border-radius:var(--radius) !important; }
+        .leaflet-popup-tip { background:var(--bg2) !important; }
+        .leaflet-popup-content { margin:12px 16px !important; }
+        .popup-name { font-size:15px; font-weight:600; margin-bottom:4px; }
+        .popup-info { font-size:12px; color:var(--text2); line-height:1.5; }
+        
+        /* Route line */
+        .route-legend { position:absolute; bottom:20px; right:20px; background:var(--bg2); border:1px solid var(--border); border-radius:var(--radius); padding:12px 16px; z-index:1000; font-size:12px; }
+        .legend-item { display:flex; align-items:center; gap:8px; margin-bottom:4px; }
+        .legend-item:last-child { margin-bottom:0; }
+        .legend-dot { width:12px; height:12px; border-radius:50%; }
+        .legend-line { width:24px; height:3px; border-radius:2px; }
+        
+        /* Responsive */
+        @media(max-width:768px) {
+            .app { flex-direction:column-reverse; }
+            .sidebar { width:100%; height:50vh; }
+            .map-container { height:50vh; }
+        }
+        
+        /* Scrollbar */
+        ::-webkit-scrollbar { width:5px; }
+        ::-webkit-scrollbar-thumb { background:var(--bg3); border-radius:3px; }
+    </style>
+</head>
+<body>
+    <div class="app">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <h1>🚐 浙西房车露营地</h1>
+                <p>杭州出发 · 3天2晚 · 一家三口</p>
+            </div>
+            
+            <!-- Filters -->
+            <div class="filters">
+                <div class="route-info">
+                    <h4>📍 推荐路线</h4>
+                    <div class="route-stops">
+                        <span class="route-stop">🏠 杭州</span><span class="arrow">→</span>
+                        <span class="route-stop">🏝️ 千岛湖</span><span class="arrow">→</span>
+                        <span class="route-stop">🌊 建德</span><span class="arrow">→</span>
+                        <span class="route-stop">🏔️ 桐庐</span><span class="arrow">→</span>
+                        <span class="route-stop">🏠 杭州</span>
+                    </div>
+                </div>
+                
+                <div class="filter-row">
+                    <div class="filter-chip active" data-filter="all" onclick="filterCampsites(this)">全部</div>
+                    <div class="filter-chip" data-filter="recommended" onclick="filterCampsites(this)">⭐ 推荐</div>
+                    <div class="filter-chip" data-filter="has-hookup" onclick="filterCampsites(this)">⚡ 有水电桩</div>
+                    <div class="filter-chip" data-filter="has-shower" onclick="filterCampsites(this)">🚿 有淋浴</div>
+                    <div class="filter-chip" data-filter="lakefront" onclick="filterCampsites(this)">🌊 湖景/江景</div>
+                </div>
+            </div>
+            
+            <!-- Campsite list -->
+            <div class="campsite-list" id="campsiteList"></div>
+        </div>
+        
+        <!-- Map -->
+        <div class="map-container">
+            <div id="map"></div>
+            <div class="route-legend">
+                <div class="legend-item"><div class="legend-dot" style="background:var(--green)"></div> 起点/终点</div>
+                <div class="legend-item"><div class="legend-dot" style="background:var(--yellow)"></div> 推荐营地</div>
+                <div class="legend-item"><div class="legend-dot" style="background:var(--accent)"></div> 其他营地</div>
+                <div class="legend-item"><div class="legend-line" style="background:var(--yellow)"></div> 推荐路线</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ========== DATA ==========
+        const CAMPSITES = [
+            // 杭州
+            {
+                id: 'hangzhou-start',
+                name: '🏠 杭州（出发地）',
+                lat: 30.2741, lng: 120.1551,
+                region: 'hangzhou',
+                type: 'start',
+                description: '杭州市区出发点',
+                phone: '',
+                price: '',
+                rating: '',
+                tags: []
+            },
+            // 千岛湖区域
+            {
+                id: 'qiandaohu-rv',
+                name: '千岛湖房车露营公园',
+                lat: 29.6102, lng: 118.9897,
+                region: 'qiandaohu',
+                recommended: true,
+                description: '千岛湖核心区域，紧邻湖畔，环境优美。营地设施齐全，有专属水电桩、卫生间和淋浴。可步行至游船码头。',
+                phone: '0571-6488-5678',
+                price: '120-180元/晚',
+                rating: '4.5',
+                day: 'Day 1 过夜',
+                tags: ['has-hookup', 'has-shower', 'lakefront'],
+                facilities: { hookup: true, shower: true, toilet: true, wifi: true, store: true }
+            },
+            {
+                id: 'qiandaohu-tuju',
+                name: '途居千岛湖露营地',
+                lat: 29.6250, lng: 119.0100,
+                region: 'qiandaohu',
+                recommended: true,
+                description: '途居品牌直营，营地规划专业。位于千岛湖东南岸，视野开阔。配套房车租赁服务（可在营地直接取车/还车）。',
+                phone: '400-100-1838',
+                price: '150-200元/晚',
+                rating: '4.7',
+                day: 'Day 1 备选',
+                tags: ['has-hookup', 'has-shower', 'lakefront', 'recommended'],
+                facilities: { hookup: true, shower: true, toilet: true, wifi: true, store: true, rental: true }
+            },
+            {
+                id: 'qiandaohu-lakeside',
+                name: '千岛湖环湖绿道营地',
+                lat: 29.5800, lng: 118.9500,
+                region: 'qiandaohu',
+                description: '沿千岛湖环湖绿道设置的简易营地，风景好但设施简单，适合自给自足型房车玩家。',
+                phone: '139-5811-XXXX',
+                price: '80元/晚',
+                rating: '3.8',
+                tags: ['has-hookup', 'lakefront'],
+                facilities: { hookup: true, shower: false, toilet: true, wifi: false, store: false }
+            },
+            // 建德区域
+            {
+                id: 'jiande-xinanjiang',
+                name: '新安江江畔房车营地',
+                lat: 29.4797, lng: 119.2810,
+                region: 'jiande',
+                recommended: true,
+                description: '位于新安江畔，紧邻水电站。江水常年14-17°C，夏天雾气缭绕。营地设施齐全，可租皮划艇、垂钓。',
+                phone: '0571-6478-9012',
+                price: '100-150元/晚',
+                rating: '4.3',
+                day: 'Day 2 过夜',
+                tags: ['has-hookup', 'has-shower', 'lakefront'],
+                facilities: { hookup: true, shower: true, toilet: true, wifi: true, store: true, fishing: true }
+            },
+            {
+                id: 'jiande-dacici',
+                name: '大慈岩景区停车场',
+                lat: 29.3900, lng: 119.3200,
+                region: 'jiande',
+                description: '大慈岩景区入口附近，有大型停车位可停房车。日间游览方便，但过夜需跟景区确认。无水电桩。',
+                phone: '0571-6471-2345',
+                price: '日间停车20元，过夜另议',
+                rating: '3.5',
+                tags: [],
+                facilities: { hookup: false, shower: false, toilet: true, wifi: false, store: true }
+            },
+            // 桐庐区域
+            {
+                id: 'tonglu-yaolin',
+                name: '瑶琳仙境景区营地',
+                lat: 29.8100, lng: 119.6400,
+                region: 'tonglu',
+                description: '瑶琳仙境景区附近，溶洞景观独特。附近有农家菜馆。Day 3 白天游览用，不在此过夜。',
+                phone: '0571-6436-1166',
+                price: '停车免费/营地50元',
+                rating: '3.8',
+                tags: ['has-hookup'],
+                facilities: { hookup: true, shower: false, toilet: true, wifi: false, store: true }
+            },
+            {
+                id: 'tonglu-fuchun',
+                name: '富春江沿岸观景台',
+                lat: 29.7800, lng: 119.6700,
+                region: 'tonglu',
+                description: '《富春山居图》实景地，适合短暂停留拍照观景。有简易停车位。',
+                phone: '',
+                price: '免费',
+                rating: '4.0',
+                tags: ['lakefront'],
+                facilities: { hookup: false, shower: false, toilet: false, wifi: false, store: false }
+            },
+            // 备选营地
+            {
+                id: 'jiande-meicheng',
+                name: '梅城古镇营地',
+                lat: 29.4500, lng: 119.3000,
+                region: 'jiande',
+                description: '梅城古镇旁，可逛古镇、品尝建德小吃。营地较新，设施不错。',
+                phone: '0571-6414-8888',
+                price: '100元/晚',
+                rating: '4.1',
+                tags: ['has-hookup', 'has-shower'],
+                facilities: { hookup: true, shower: true, toilet: true, wifi: true, store: true }
+            }
+        ];
+
+        // Route coordinates
+        const ROUTE_PATH = [
+            [30.2741, 120.1551], // 杭州
+            [29.9500, 119.7000], // 经千岛湖方向
+            [29.6102, 118.9897], // 千岛湖
+            [29.4797, 119.2810], // 建德新安江
+            [29.7800, 119.6700], // 桐庐
+            [30.2741, 120.1551], // 回杭州
+        ];
+
+        // ========== MAP INIT ==========
+        const map = L.map('map', {
+            zoomControl: false
+        }).setView([29.8, 119.5], 9);
+
+        L.control.zoom({ position: 'topright' }).addTo(map);
+
+        // Tile layer - dark theme
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+            attribution: '&copy; <a href="https://carto.com/">CARTO</a>',
+            maxZoom: 18
+        }).addTo(map);
+
+        // ========== ROUTE LINE ==========
+        L.polyline(ROUTE_PATH, {
+            color: '#eab308',
+            weight: 3,
+            opacity: 0.6,
+            dashArray: '10, 10'
+        }).addTo(map);
+
+        // ========== MARKERS ==========
+        const markers = {};
+
+        function createMarkerIcon(type, isRecommended) {
+            if (type === 'start') {
+                return L.divIcon({ className: 'custom-marker start', html: '🏠 杭州', iconSize: [80, 30], iconAnchor: [40, 36] });
+            }
+            if (isRecommended) {
+                return L.divIcon({ className: 'custom-marker recommended', html: '⭐ 推荐', iconSize: [70, 30], iconAnchor: [35, 36] });
+            }
+            return L.divIcon({ className: 'custom-marker', html: '📍 营地', iconSize: [60, 30], iconAnchor: [30, 36] });
+        }
+
+        CAMPSITES.forEach(cs => {
+            const icon = createMarkerIcon(cs.type, cs.recommended);
+            const marker = L.marker([cs.lat, cs.lng], { icon })
+                .addTo(map)
+                .bindPopup(`
+                    <div class="popup-name">${cs.name}</div>
+                    <div class="popup-info">
+                        ${cs.price ? '💰 ' + cs.price + '<br>' : ''}
+                        ${cs.phone ? '📞 ' + cs.phone + '<br>' : ''}
+                        ${cs.rating ? '⭐ ' + cs.rating + '/5<br>' : ''}
+                        ${cs.description.slice(0, 100)}...
+                    </div>
+                `);
+            markers[cs.id] = marker;
+        });
+
+        // ========== SIDEBAR RENDER ==========
+        function renderCampsiteList(filter = 'all') {
+            const list = document.getElementById('campsiteList');
+            const filtered = CAMPSITES.filter(cs => {
+                if (cs.type === 'start') return false;
+                if (filter === 'all') return true;
+                if (filter === 'recommended') return cs.recommended;
+                return cs.tags && cs.tags.includes(filter);
+            });
+
+            list.innerHTML = filtered.map(cs => `
+                <div class="campsite-card ${cs.recommended ? 'highlighted' : ''}" 
+                     data-id="${cs.id}" 
+                     onclick="focusCampsite('${cs.id}')">
+                    <div class="card-header">
+                        <div class="card-name">${cs.name}</div>
+                        <div class="card-rating ${parseFloat(cs.rating||0)>=4?'good':'avg'}">
+                            ⭐ ${cs.rating || 'N/A'}
+                        </div>
+                    </div>
+                    ${cs.day ? `<div style="font-size:12px;color:var(--yellow);margin-bottom:6px;">📅 ${cs.day}</div>` : ''}
+                    <div class="card-tags">
+                        <span class="tag ${cs.facilities?.hookup?'has':'no'}">⚡ ${cs.facilities?.hookup?'有水电桩':'无水电桩'}</span>
+                        <span class="tag ${cs.facilities?.shower?'has':'no'}">🚿 ${cs.facilities?.shower?'有淋浴':'无淋浴'}</span>
+                        <span class="tag ${cs.facilities?.wifi?'has':'no'}">📶 ${cs.facilities?.wifi?'有WiFi':'无WiFi'}</span>
+                        ${cs.facilities?.fishing ? '<span class="tag has">🎣 可垂钓</span>' : ''}
+                        ${cs.facilities?.rental ? '<span class="tag has">🚐 可租房车</span>' : ''}
+                    </div>
+                    <div class="card-detail">${cs.description.slice(0, 80)}...</div>
+                    <div class="card-footer">
+                        <span class="card-price">💰 ${cs.price}</span>
+                        <span class="card-phone">📞 ${cs.phone || '无'}</span>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function filterCampsites(el) {
+            document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+            el.classList.add('active');
+            renderCampsiteList(el.dataset.filter);
+        }
+
+        function focusCampsite(id) {
+            const cs = CAMPSITES.find(c => c.id === id);
+            if (!cs) return;
+            
+            map.flyTo([cs.lat, cs.lng], 13, { duration: 0.8 });
+            markers[id].openPopup();
+            
+            // Highlight card
+            document.querySelectorAll('.campsite-card').forEach(c => c.classList.remove('active'));
+            document.querySelector(`[data-id="${id}"]`)?.classList.add('active');
+        }
+
+        // ========== INIT ==========
+        renderCampsiteList();
+    </script>
+</body>
+</html>
