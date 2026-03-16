@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🚐 清明房车旅行规划 · 杭州出发</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg:#0f172a; --bg2:#1e293b; --bg3:#334155; --bg4:#475569;
+            --text:#f1f5f9; --text2:#94a3b8;
+            --blue:#3b82f6; --green:#22c55e; --yellow:#eab308; --red:#ef4444; --purple:#8b5cf6;
+            --border:rgba(255,255,255,0.08); --radius:12px;
+        }
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);line-height:1.6}
+        .container{max-width:1100px;margin:0 auto;padding:0 24px}
+        
+        /* Hero */
+        .hero{padding:60px 0 40px;text-align:center;background:radial-gradient(ellipse at 50% 0%,rgba(59,130,246,0.15),transparent 60%)}
+        .hero h1{font-size:36px;font-weight:800;margin-bottom:8px}
+        .hero h1 span{background:linear-gradient(135deg,#3b82f6,#8b5cf6);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+        .hero .subtitle{color:var(--text2);font-size:16px;margin-bottom:24px}
+        .hero-stats{display:flex;justify-content:center;gap:32px;flex-wrap:wrap}
+        .stat{text-align:center}
+        .stat-num{font-size:28px;font-weight:700;color:var(--blue)}
+        .stat-label{font-size:12px;color:var(--text2)}
+        
+        /* Section */
+        section{padding:48px 0}
+        .section-title{font-size:24px;font-weight:700;margin-bottom:8px;display:flex;align-items:center;gap:10px}
+        .section-sub{color:var(--text2);font-size:14px;margin-bottom:28px}
+        
+        /* Route Timeline */
+        .timeline{position:relative;padding-left:32px}
+        .timeline::before{content:'';position:absolute;left:11px;top:0;bottom:0;width:2px;background:var(--blue)}
+        .timeline-day{position:relative;margin-bottom:32px}
+        .timeline-dot{position:absolute;left:-32px;top:4px;width:22px;height:22px;border-radius:50%;background:var(--blue);border:3px solid var(--bg);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700}
+        .day-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:24px}
+        .day-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:8px}
+        .day-title{font-size:18px;font-weight:700}
+        .day-date{font-size:13px;color:var(--yellow);background:rgba(234,179,8,0.1);padding:4px 12px;border-radius:20px}
+        .stops{display:flex;flex-direction:column;gap:12px}
+        .stop{display:flex;gap:12px;align-items:start}
+        .stop-time{font-size:13px;color:var(--text2);min-width:50px;font-weight:500}
+        .stop-dot{width:8px;height:8px;border-radius:50%;background:var(--blue);margin-top:6px;flex-shrink:0}
+        .stop-content h4{font-size:14px;font-weight:600;margin-bottom:2px}
+        .stop-content p{font-size:13px;color:var(--text2)}
+        .stop-highlight{background:var(--bg3);padding:8px 12px;border-radius:8px;margin-top:4px;font-size:13px}
+        
+        /* Rental Comparison Table */
+        .compare-table{width:100%;border-collapse:separate;border-spacing:0;background:var(--bg2);border-radius:var(--radius);overflow:hidden;border:1px solid var(--border)}
+        .compare-table th{background:var(--bg3);padding:14px 16px;text-align:left;font-size:13px;font-weight:600;color:var(--text2)}
+        .compare-table td{padding:14px 16px;font-size:14px;border-top:1px solid var(--border)}
+        .compare-table tr:hover td{background:rgba(59,130,246,0.05)}
+        .badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600}
+        .badge-best{background:rgba(34,197,94,0.15);color:var(--green)}
+        .badge-good{background:rgba(59,130,246,0.15);color:var(--blue)}
+        .badge-warn{background:rgba(234,179,8,0.15);color:var(--yellow)}
+        .price-highlight{font-weight:700;color:var(--yellow);font-size:16px}
+        .phone-link{color:var(--blue);text-decoration:none;font-weight:500}
+        .phone-link:hover{text-decoration:underline}
+        
+        /* RV Type Cards */
+        .rv-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px;margin-bottom:32px}
+        .rv-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:20px;position:relative}
+        .rv-card.recommended{border-color:var(--green);box-shadow:0 0 0 1px var(--green)}
+        .rv-card .recommend-badge{position:absolute;top:-10px;right:16px;background:var(--green);color:#000;padding:2px 10px;border-radius:10px;font-size:11px;font-weight:700}
+        .rv-card h3{font-size:16px;margin-bottom:4px}
+        .rv-card .rv-subtitle{font-size:13px;color:var(--text2);margin-bottom:12px}
+        .rv-specs{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+        .rv-spec{font-size:13px}
+        .rv-spec .label{color:var(--text2);font-size:11px}
+        .rv-spec .value{font-weight:600}
+        
+        /* Budget */
+        .budget-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-bottom:24px}
+        .budget-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:20px;text-align:center}
+        .budget-card .amount{font-size:28px;font-weight:700;margin:8px 0}
+        .budget-card .label{font-size:13px;color:var(--text2)}
+        .budget-card.total{background:linear-gradient(135deg,rgba(59,130,246,0.15),rgba(139,92,246,0.15));border-color:var(--blue)}
+        .budget-card.total .amount{color:var(--blue)}
+        
+        /* Checklist */
+        .checklist{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px}
+        .checklist-group{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:20px}
+        .checklist-group h4{font-size:15px;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+        .checklist-group ul{list-style:none}
+        .checklist-group li{font-size:13px;padding:4px 0;color:var(--text2);display:flex;align-items:center;gap:6px}
+        .checklist-group li::before{content:'☐';font-size:14px}
+        
+        /* Campsite Link Banner */
+        .cta-banner{background:linear-gradient(135deg,rgba(59,130,246,0.1),rgba(139,92,246,0.1));border:1px solid rgba(59,130,246,0.3);border-radius:var(--radius);padding:32px;text-align:center;margin:32px 0}
+        .cta-banner h3{font-size:20px;margin-bottom:8px}
+        .cta-banner p{color:var(--text2);font-size:14px;margin-bottom:16px}
+        .cta-btn{display:inline-block;padding:12px 28px;background:var(--blue);color:white;text-decoration:none;border-radius:8px;font-weight:600;font-size:15px;transition:all 0.2s}
+        .cta-btn:hover{background:var(--purple);transform:translateY(-1px)}
+        
+        /* Notes */
+        .notes{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:24px}
+        .notes h4{margin-bottom:12px}
+        .notes ul{list-style:none}
+        .notes li{font-size:13px;color:var(--text2);padding:6px 0;border-bottom:1px solid var(--border);display:flex;gap:8px}
+        .notes li:last-child{border:none}
+        .notes li .icon{flex-shrink:0}
+        
+        /* Footer */
+        footer{padding:32px 0;text-align:center;color:var(--text2);font-size:13px;border-top:1px solid var(--border)}
+        
+        /* Responsive */
+        @media(max-width:768px){
+            .hero h1{font-size:28px}
+            .hero-stats{gap:20px}
+            .compare-table{font-size:12px}
+            .compare-table th,.compare-table td{padding:10px 8px}
+        }
+    </style>
+</head>
+<body>
+    <!-- Hero -->
+    <div class="hero">
+        <div class="container">
+            <h1>🚐 <span>清明房车旅行</span></h1>
+            <p class="subtitle">杭州出发 · 3天2晚 · 一家三口 · 2026年4月4-6日</p>
+            <div class="hero-stats">
+                <div class="stat"><div class="stat-num">3</div><div class="stat-label">天</div></div>
+                <div class="stat"><div class="stat-num">450</div><div class="stat-label">公里</div></div>
+                <div class="stat"><div class="stat-num">8</div><div class="stat-label">个营地</div></div>
+                <div class="stat"><div class="stat-num">¥2,670</div><div class="stat-label">预算（不含租车）</div></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Route Timeline -->
+    <section style="background:var(--bg2)">
+        <div class="container">
+            <div class="section-title">📍 行程路线</div>
+            <p class="section-sub">环线设计，不走回头路</p>
+            
+            <div class="timeline">
+                <!-- Day 1 -->
+                <div class="timeline-day">
+                    <div class="timeline-dot">1</div>
+                    <div class="day-card">
+                        <div class="day-header">
+                            <span class="day-title">🏝️ 杭州 → 千岛湖</span>
+                            <span class="day-date">4月4日 · 周六</span>
+                        </div>
+                        <div class="stops">
+                            <div class="stop">
+                                <span class="stop-time">08:00</span>
+                                <div class="stop-dot"></div>
+                                <div class="stop-content"><h4>杭州出发</h4><p>杭千高速，约150km / 2小时</p></div>
+                            </div>
+                            <div class="stop">
+                                <span class="stop-time">10:30</span>
+                                <div class="stop-dot"></div>
+                                <div class="stop-content"><h4>抵达千岛湖</h4><p>🍜 鱼街午餐：千岛湖鱼头（约200元）</p></div>
+                            </div>
+                            <div class="stop">
+                                <span class="stop-time">13:00</span>
+                                <div class="stop-dot"></div>
+                                <div class="stop-content"><h4>中心湖区游船</h4><p>梅峰岛 + 月光岛，约3小时（3人约450元）</p></div>
+                            </div>
+                            <div class="stop">
+                                <span class="stop-time">17:00</span>
+                                <div class="stop-dot" style="background:var(--yellow)"></div>
+                                <div class="stop-content">
+                                    <h4>⭐ 房车营地停靠</h4>
+                                    <div class="stop-highlight">推荐：途居千岛湖露营地 或 千岛湖房车露营公园<br>💰 120-180元/晚 · ⚡有水电桩 · 🚿有淋浴</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Day 2 -->
+                <div class="timeline-day">
+                    <div class="timeline-dot">2</div>
+                    <div class="day-card">
+                        <div class="day-header">
+                            <span class="day-title">🌊 千岛湖 → 建德</span>
+                            <span class="day-date">4月5日 · 清明节</span>
+                        </div>
+                        <div class="stops">
+                            <div class="stop">
+                                <span class="stop-time">08:00</span>
+                                <div class="stop-dot"></div>
+                                <div class="stop-content"><h4>营地早餐 + 出发</h4><p>环湖公路前往建德，约80km</p></div>
+                            </div>
+                            <div class="stop">
+                                <span class="stop-time">10:30</span>
+                                <div class="stop-dot"></div>
+                                <div class="stop-content"><h4>🏔️ 大慈岩景区</h4><p>悬空寺 + 天然立佛，约2.5小时（3人约240元）</p></div>
+                            </div>
+                            <div class="stop">
+                                <span class="stop-time">14:30</span>
+                                <div class="stop-dot"></div>
+                                <div class="stop-content"><h4>新安江水电站</h4><p>新中国第一座自行设计的大型水电站</p></div>
+                            </div>
+                            <div class="stop">
+                                <span class="stop-time">16:00</span>
+                                <div class="stop-dot"></div>
+                                <div class="stop-content"><h4>🚣 新安江漂流</h4><p>水温14-17°C，雾气缭绕如仙境（3人约300元）</p></div>
+                            </div>
+                            <div class="stop">
+                                <span class="stop-time">18:00</span>
+                                <div class="stop-dot" style="background:var(--yellow)"></div>
+                                <div class="stop-content">
+                                    <h4>⭐ 房车营地停靠</h4>
+                                    <div class="stop-highlight">推荐：新安江江畔房车营地<br>💰 100-150元/晚 · 🎣可垂钓 · 🌊江景</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Day 3 -->
+                <div class="timeline-day">
+                    <div class="timeline-dot">3</div>
+                    <div class="day-card">
+                        <div class="day-header">
+                            <span class="day-title">🏔️ 建德 → 桐庐 → 杭州</span>
+                            <span class="day-date">4月6日 · 周一</span>
+                        </div>
+                        <div class="stops">
+                            <div class="stop">
+                                <span class="stop-time">07:30</span>
+                                <div class="stop-dot"></div>
+                                <div class="stop-content"><h4>🌫️ 新安江晨雾</h4><p>早起看雾，必打卡！清明时节最美</p></div>
+                            </div>
+                            <div class="stop">
+                                <span class="stop-time">10:30</span>
+                                <div class="stop-dot"></div>
+                                <div class="stop-content"><h4>🏞️ 瑶琳仙境</h4><p>溶洞奇观，小朋友会喜欢（3人约270元）</p></div>
+                            </div>
+                            <div class="stop">
+                                <span class="stop-time">14:00</span>
+                                <div class="stop-dot"></div>
+                                <div class="stop-content"><h4>🌿 富春江沿岸</h4><p>《富春山居图》实景地，拍照留念</p></div>
+                            </div>
+                            <div class="stop">
+                                <span class="stop-time">15:00</span>
+                                <div class="stop-dot" style="background:var(--green)"></div>
+                                <div class="stop-content"><h4>🏠 返回杭州</h4><p>杭千高速约100km，17:00到家</p></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Campsite Map CTA -->
+    <div class="container">
+        <div class="cta-banner">
+            <h3>📍 交互式露营地地图</h3>
+            <p>查看沿线8个露营地的详细信息、设施对比、联系方式</p>
+            <a href="campsites.html" class="cta-btn">🗺️ 打开地图 →</a>
+        </div>
+    </div>
+
+    <!-- RV Rental Comparison -->
+    <section>
+        <div class="container">
+            <div class="section-title">🚐 房车租赁比选</div>
+            <p class="section-sub">一家三口推荐 B型房车：C照可开，油耗低，灵活好停</p>
+            
+            <!-- RV Type Cards -->
+            <div class="rv-cards">
+                <div class="rv-card recommended">
+                    <div class="recommend-badge">⭐ 推荐</div>
+                    <h3>B型房车</h3>
+                    <p class="rv-subtitle">最适合一家三口</p>
+                    <div class="rv-specs">
+                        <div class="rv-spec"><div class="label">日租金</div><div class="value">800-1200元</div></div>
+                        <div class="rv-spec"><div class="label">3天总价</div><div class="value">2400-3600元</div></div>
+                        <div class="rv-spec"><div class="label">驾照</div><div class="value">C1/C2 ✅</div></div>
+                        <div class="rv-spec"><div class="label">油耗</div><div class="value">8-10L/100km</div></div>
+                        <div class="rv-spec"><div class="label">灵活性</div><div class="value">⭐⭐⭐⭐⭐</div></div>
+                        <div class="rv-spec"><div class="label">舒适度</div><div class="value">⭐⭐⭐</div></div>
+                    </div>
+                </div>
+                <div class="rv-card">
+                    <h3>C型房车</h3>
+                    <p class="rv-subtitle">空间更大，更舒适</p>
+                    <div class="rv-specs">
+                        <div class="rv-spec"><div class="label">日租金</div><div class="value">1200-1800元</div></div>
+                        <div class="rv-spec"><div class="label">3天总价</div><div class="value">3600-5400元</div></div>
+                        <div class="rv-spec"><div class="label">驾照</div><div class="value">C1（部分B照）</div></div>
+                        <div class="rv-spec"><div class="label">油耗</div><div class="value">12-15L/100km</div></div>
+                        <div class="rv-spec"><div class="label">灵活性</div><div class="value">⭐⭐⭐</div></div>
+                        <div class="rv-spec"><div class="label">舒适度</div><div class="value">⭐⭐⭐⭐⭐</div></div>
+                    </div>
+                </div>
+                <div class="rv-card">
+                    <h3>拖挂房车</h3>
+                    <p class="rv-subtitle">价格最低但操作麻烦</p>
+                    <div class="rv-specs">
+                        <div class="rv-spec"><div class="label">日租金</div><div class="value">500-800元</div></div>
+                        <div class="rv-spec"><div class="label">3天总价</div><div class="value">1500-2400元</div></div>
+                        <div class="rv-spec"><div class="label">驾照</div><div class="value">需拖挂经验</div></div>
+                        <div class="rv-spec"><div class="label">油耗</div><div class="value">6-8L/100km</div></div>
+                        <div class="rv-spec"><div class="label">灵活性</div><div class="value">⭐⭐</div></div>
+                        <div class="rv-spec"><div class="label">舒适度</div><div class="value">⭐⭐⭐</div></div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Platform Comparison Table -->
+            <table class="compare-table">
+                <thead>
+                    <tr>
+                        <th>租赁平台</th>
+                        <th>B型日租</th>
+                        <th>3天估价</th>
+                        <th>杭州取车</th>
+                        <th>保险</th>
+                        <th>推荐度</th>
+                        <th>联系方式</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>途居房车</strong></td>
+                        <td>800-1000元</td>
+                        <td class="price-highlight">~2,400元</td>
+                        <td>✅ 或千岛湖取</td>
+                        <td>✅ 含</td>
+                        <td><span class="badge badge-best">最佳性价比</span></td>
+                        <td><a href="tel:4001001838" class="phone-link">📞 400-100-1838</a><br><span style="font-size:12px;color:var(--text2)">小程序「途居露营」</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>房车生活家</strong></td>
+                        <td>880-1180元</td>
+                        <td class="price-highlight">~2,800元</td>
+                        <td>✅ 杭州有门店</td>
+                        <td>✅ 含</td>
+                        <td><span class="badge badge-best">服务最好</span></td>
+                        <td><a href="tel:4008203656" class="phone-link">📞 400-820-3656</a><br><span style="font-size:12px;color:var(--text2)">小程序「房车生活家」</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>一嗨租车</strong></td>
+                        <td>900-1300元</td>
+                        <td class="price-highlight">~3,000元</td>
+                        <td>✅ 多个门店</td>
+                        <td>✅ 含</td>
+                        <td><span class="badge badge-good">品牌可靠</span></td>
+                        <td><a href="tel:4008886608" class="phone-link">📞 400-888-6608</a><br><span style="font-size:12px;color:var(--text2)">APP「一嗨租车」</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>携程比价</strong></td>
+                        <td>700-1500元</td>
+                        <td class="price-highlight">~2,500元</td>
+                        <td>✅ 看供应商</td>
+                        <td>⚠️ 看条款</td>
+                        <td><span class="badge badge-warn">需甄别</span></td>
+                        <td><span style="font-size:12px;color:var(--text2)">携程APP搜「房车租赁」</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>本地车行</strong></td>
+                        <td>700-1000元</td>
+                        <td class="price-highlight">~2,100元</td>
+                        <td>✅ 上门取</td>
+                        <td>⚠️ 另购</td>
+                        <td><span class="badge badge-warn">最便宜</span></td>
+                        <td><span style="font-size:12px;color:var(--text2)">大众点评搜「杭州房车租赁」</span></td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <div style="background:var(--bg2);border:1px solid var(--yellow);border-radius:8px;padding:16px 20px;margin-top:20px;font-size:14px">
+                <strong style="color:var(--yellow)">💡 结论：</strong>
+                途居房车性价比最高（租车+营地一站式），房车生活家服务最好，预算紧选本地车行。
+                <strong>清明是旺季，建议现在就打电话预订！</strong>
+            </div>
+        </div>
+    </section>
+
+    <!-- Budget -->
+    <section style="background:var(--bg2)">
+        <div class="container">
+            <div class="section-title">💰 预算汇总</div>
+            <p class="section-sub">按B型房车 + 途居租赁估算</p>
+            
+            <div class="budget-grid">
+                <div class="budget-card">
+                    <div class="label">🚐 房车租赁</div>
+                    <div class="amount" style="color:var(--blue)">¥2,400</div>
+                    <div class="label">3天B型房车</div>
+                </div>
+                <div class="budget-card">
+                    <div class="label">⛽ 油费</div>
+                    <div class="amount" style="color:var(--green)">¥380</div>
+                    <div class="label">450km · 约8L/100km</div>
+                </div>
+                <div class="budget-card">
+                    <div class="label">🛣️ 高速费</div>
+                    <div class="amount" style="color:var(--text2)">¥140</div>
+                    <div class="label">往返高速</div>
+                </div>
+                <div class="budget-card">
+                    <div class="label">🎫 门票</div>
+                    <div class="amount" style="color:var(--purple)">¥1,260</div>
+                    <div class="label">游船+景区+漂流</div>
+                </div>
+                <div class="budget-card">
+                    <div class="label">🍜 餐饮</div>
+                    <div class="amount" style="color:var(--yellow)">¥590</div>
+                    <div class="label">3天餐饮</div>
+                </div>
+                <div class="budget-card">
+                    <div class="label">🏕️ 营地</div>
+                    <div class="amount" style="color:var(--green)">¥300</div>
+                    <div class="label">2晚停靠</div>
+                </div>
+                <div class="budget-card total">
+                    <div class="label">💵 总计</div>
+                    <div class="amount">¥5,070</div>
+                    <div class="label">一家三口全程</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Checklist -->
+    <section>
+        <div class="container">
+            <div class="section-title">🎒 装备清单</div>
+            <p class="section-sub">出发前逐项检查</p>
+            
+            <div class="checklist">
+                <div class="checklist-group">
+                    <h4>🚐 房车相关</h4>
+                    <ul>
+                        <li>水电桩转接头</li>
+                        <li>房车专用延长线</li>
+                        <li>废水收集桶</li>
+                        <li>灭火器、三角警示牌</li>
+                    </ul>
+                </div>
+                <div class="checklist-group">
+                    <h4>🍳 生活用品</h4>
+                    <ul>
+                        <li>食材、调味料</li>
+                        <li>便携炉具、气罐</li>
+                        <li>锅具、餐具</li>
+                        <li>矿泉水（至少2箱）</li>
+                        <li>垃圾袋（多备）</li>
+                    </ul>
+                </div>
+                <div class="checklist-group">
+                    <h4>👕 穿衣</h4>
+                    <ul>
+                        <li>春季外套（早晚冷）</li>
+                        <li>舒适徒步鞋</li>
+                        <li>防雨外套（清明多雨）</li>
+                        <li>帽子、防晒霜</li>
+                    </ul>
+                </div>
+                <div class="checklist-group">
+                    <h4>👶 亲子物品</h4>
+                    <ul>
+                        <li>零食、玩具</li>
+                        <li>防蚊液</li>
+                        <li>创可贴、常用药</li>
+                        <li>望远镜</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Notes -->
+    <section style="background:var(--bg2)">
+        <div class="container">
+            <div class="section-title">⚠️ 注意事项</div>
+            <div class="notes" style="background:var(--bg)">
+                <ul>
+                    <li><span class="icon">🌧️</span> 清明天气：4月初浙西多雨，带好雨具和防滑鞋</li>
+                    <li><span class="icon">🥶</span> 新安江水温常年14-17°C，漂流会湿身，多带一套衣服</li>
+                    <li><span class="icon">📞</span> 营地提前预订：清明是旺季，建议提前1周电话确认</li>
+                    <li><span class="icon">🚗</span> 环湖弯道多：注意车速，尤其雨天路滑</li>
+                    <li><span class="icon">⛽</span> 油量规划：建德/桐庐加油站充足，保持半箱以上</li>
+                    <li><span class="icon">🔋</span> 充电：营地有电源桩，手机/相机随时充</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <p>🚐 清明房车旅行规划 · 杭州出发 · 2026年4月4-6日</p>
+            <p style="margin-top:8px">
+                <a href="campsites.html" style="color:var(--blue)">露营地地图</a> · 
+                <a href="index.html" style="color:var(--blue)">NewsBrief 首页</a>
+            </p>
+        </div>
+    </footer>
+</body>
+</html>
