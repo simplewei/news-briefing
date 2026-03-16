@@ -6,7 +6,7 @@
 ![License](https://img.shields.io/badge/license-MIT-green)
 ![Platform](https://img.shields.io/badge/platform-OpenClaw-purple)
 
-🌐 **[在线演示](https://simplewei.github.io/news-briefing)**
+🌐 **[在线演示](https://simplewei.github.io/news-briefing)** | 🚐 **[露营地地图](https://simplewei.github.io/news-briefing/campsites.html)** | 📰 **[新闻简报](https://simplewei.github.io/news-briefing/app.html)**
 
 ---
 
@@ -129,3 +129,16 @@ MIT License
 ---
 
 *Built with ❤️ on [OpenClaw](https://openclaw.ai)*
+
+## 🚐 额外功能：房车露营地地图
+
+除了新闻简报，本项目还包含一个**浙西房车露营地可视化地图**：
+
+- 📍 杭州→千岛湖→建德→桐庐沿线 8 个露营地
+- 🗺️ 交互式暗色地图（Leaflet）
+- 🔍 设施筛选：水电桩 / 淋浴 / WiFi / 湖景
+- ⭐ 推荐营地高亮
+- 📞 每个营地的联系方式和价格
+- 🛣️ 推荐路线虚线标注
+
+打开 [campsites.html](https://simplewei.github.io/news-briefing/campsites.html) 即可使用。
